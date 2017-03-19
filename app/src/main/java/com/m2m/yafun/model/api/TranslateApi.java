@@ -24,9 +24,11 @@ public class TranslateApi extends BaseApi {
     private Languages languagesCache;
 
     public void getLanguages(final OnLanguagesReceivedListener listener) {
-        YandexTranslateService service = getService();
-        String lang = Locale.getDefault().getCountry();
-        service.getLanguages(getApiKey(), lang).enqueue(new Callback<Languages>() {
+        getLanguages(Locale.getDefault().getLanguage(), listener);
+    }
+
+    public void getLanguages(String uiLanguage, final OnLanguagesReceivedListener listener) {
+        getLanguagesCall(uiLanguage).enqueue(new Callback<Languages>() {
             @Override
             public void onResponse(Call<Languages> call, Response<Languages> response) {
                 if(response.isSuccessful()) {
@@ -45,9 +47,24 @@ public class TranslateApi extends BaseApi {
         });
     }
 
-    public void detectLanguage(final String text, final OnLanguageDetermineListener listener) {
+    public Languages getLanguagesSync(String uiLanguage) {
+        try {
+            return getLanguagesCall(uiLanguage).execute().body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Call<Languages> getLanguagesCall(String uiLanguage) {
         YandexTranslateService service = getService();
-        service.detectLanguage(getApiKey(), text).enqueue(new Callback<DetectedLanguage>() {
+        if (uiLanguage == null)
+            uiLanguage = Locale.getDefault().getLanguage();
+        return service.getLanguages(getApiKey(), uiLanguage);
+    }
+
+    public void detectLanguage(final String text, final OnLanguageDetermineListener listener) {
+        getDetectLanguageCall(getApiKey()).enqueue(new Callback<DetectedLanguage>() {
             @Override
             public void onResponse(Call<DetectedLanguage> call, Response<DetectedLanguage> response) {
                 if(response.isSuccessful())
@@ -64,8 +81,21 @@ public class TranslateApi extends BaseApi {
         });
     }
 
+    public DetectedLanguage detectedLanguageSync(String text) {
+        try {
+            return getDetectLanguageCall(text).execute().body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Call<DetectedLanguage> getDetectLanguageCall(String text) {
+        return getService().detectLanguage(getApiKey(), text);
+    }
+
     public void translate(final String text, String translateDirection, final OnTranslateListener listener) {
-        getService().translate(getApiKey(), translateDirection, text).enqueue(new Callback<TranslateResult>() {
+        getTranslateCall(translateDirection, text).enqueue(new Callback<TranslateResult>() {
             @Override
             public void onResponse(Call<TranslateResult> call, Response<TranslateResult> response) {
                 if(response.isSuccessful())
@@ -80,6 +110,19 @@ public class TranslateApi extends BaseApi {
                 listener.onTranslateError(t.getMessage());
             }
         });
+    }
+
+    public TranslateResult translateSync(String text, String translateDirection) {
+        try {
+            return getTranslateCall(text, translateDirection).execute().body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Call<TranslateResult> getTranslateCall(String text, String translateDirection) {
+        return getService().translate(getApiKey(), translateDirection, text);
     }
 
     private static <T> String getError(Response<T> response, String defaultError) {

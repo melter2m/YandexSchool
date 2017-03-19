@@ -6,6 +6,7 @@ import com.m2m.yafun.model.api.service.result.TranslateResult;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
@@ -21,6 +22,7 @@ public interface YandexTranslateService {
     @GET("api/v1.5/tr.json/detect")
     Call<DetectedLanguage> detectLanguage(@Query("key") String apiKey, @Query("text") String text, @Query("hint") String hint);
 
+    @FormUrlEncoded
     @POST("/api/v1.5/tr.json/translate")
     Call<TranslateResult> translate(@Query("key") String apiKey, @Query("lang") String translateDirection, @Field("text") String toTranslate);
 }
