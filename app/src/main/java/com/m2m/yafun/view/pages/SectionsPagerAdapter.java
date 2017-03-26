@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.m2m.yafun.view.MainActivity;
+import com.m2m.yafun.view.pages.translate.TranslateFragment;
 
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 

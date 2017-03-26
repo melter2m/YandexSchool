@@ -123,6 +123,8 @@ public abstract class TableGateway<T extends EntityBase> implements ITableGatewa
 
     @Override
     public void updateItem(long id, T newItemValue) {
+        if (id < 0)
+            return;
         SQLiteDatabase db = dbOpenHelper.getWritableDatabase();
         ContentValues cv = getContentValues(newItemValue);
         db.update(getTableName(), cv, DbScheme.Base.Id + EqualsValue, new String[]{id + ""});

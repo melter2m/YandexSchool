@@ -23,6 +23,14 @@ public class TranslateApi extends BaseApi {
 
     private Languages languagesCache;
 
+    public TranslateApi(Languages prevLanguages) {
+        this.languagesCache = prevLanguages;
+    }
+
+    public Languages getLanguagesCache() {
+        return languagesCache;
+    }
+
     public void getLanguages(final OnLanguagesReceivedListener listener) {
         getLanguages(Locale.getDefault().getLanguage(), listener);
     }
@@ -95,7 +103,7 @@ public class TranslateApi extends BaseApi {
     }
 
     public void translate(final String text, String translateDirection, final OnTranslateListener listener) {
-        getTranslateCall(translateDirection, text).enqueue(new Callback<TranslateResult>() {
+        getTranslateCall(text, translateDirection).enqueue(new Callback<TranslateResult>() {
             @Override
             public void onResponse(Call<TranslateResult> call, Response<TranslateResult> response) {
                 if(response.isSuccessful())

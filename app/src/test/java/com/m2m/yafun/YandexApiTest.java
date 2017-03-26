@@ -5,13 +5,16 @@ import com.m2m.yafun.model.api.service.result.DetectedLanguage;
 import com.m2m.yafun.model.api.service.result.Languages;
 import com.m2m.yafun.model.api.service.result.TranslateResult;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.Locale;
 
 import static org.junit.Assert.*;
 
 public class YandexApiTest {
 
-    private TranslateApi api = new TranslateApi();
+    private TranslateApi api = new TranslateApi(null);
 
     @Test
     public void getLanguagesTest() throws Exception {

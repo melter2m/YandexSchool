@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,15 +72,15 @@ public class LanguagesGateway extends DatedEntityGateway<LanguagesItem> implemen
         return result;
     }
 
-    private Map<String, String> getLanguages(Cursor c) {
-        Map<String, String> result = new HashMap<>();
+    private LinkedHashMap<String, String> getLanguages(Cursor c) {
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
         try {
             JSONArray languages = new JSONArray(c.getString(c.getColumnIndex(DbScheme.Languages.Languages)));
             for (int i = 0;i < languages.length(); ++i) {
                 JSONObject language = languages.getJSONObject(i);
                 JSONArray names = language.names();
                 for (int j = 0; j < names.length(); ++j) {
-                    String name = names.getString(i);
+                    String name = names.getString(j);
                     result.put(name, language.getString(name));
                 }
             }

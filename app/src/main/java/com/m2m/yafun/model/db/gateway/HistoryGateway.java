@@ -20,6 +20,18 @@ public class HistoryGateway extends DatedEntityGateway<HistoryItem> implements I
     }
 
     @Override
+    public HistoryItem setFavorite(HistoryItem item, boolean value) {
+        HistoryItem result = new HistoryItem(item.getId(), item.getDate(), item.getText(), item.getDirection(), item.getTranslation(), value);
+        updateItem(item.getId(), result);
+        return result;
+    }
+
+    @Override
+    public List<HistoryItem> getOnlyFavorite() {
+        return getItems(null, DbScheme.History.IsFavorite + " = ?", new String[] {TrueValue + ""}, null, null, null);
+    }
+
+    @Override
     protected void fillContentValuesWithSpecificData(HistoryItem item, ContentValues cv) {
         cv.put(DbScheme.History.Direction, item.getDirection());
         cv.put(DbScheme.History.Text, item.getText());
@@ -70,10 +82,5 @@ public class HistoryGateway extends DatedEntityGateway<HistoryItem> implements I
         return value == TrueValue;
     }
 
-    @Override
-    public HistoryItem setFavorite(HistoryItem item, boolean value) {
-        HistoryItem result = new HistoryItem(item.getId(), item.getDate(), item.getText(), item.getDirection(), item.getTranslation(), value);
-        updateItem(item.getId(), result);
-        return result;
-    }
+
 }
