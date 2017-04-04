@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -43,6 +44,8 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
 
     private TranslationsAdapter translationsAdapter;
 
+    private String detectedLanguage = "en";
+
     public TranslateFragment() {
         // Required empty public constructor
     }
@@ -53,12 +56,27 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
         spinnerFrom = (Spinner) result.findViewById(R.id.spinnerLanguageFrom);
         spinnerTo = (Spinner) result.findViewById(R.id.spinnerLanguageTo);
         detectedLanguageView = (TextView) result.findViewById(R.id.detectedLanguage);
+        detectedLanguageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setFromLanguage(detectedLanguage);
+            }
+        });
         textToTranslate = (EditText) result.findViewById(R.id.textToTranslate);
         clear = (ImageView) result.findViewById(R.id.clearInput);
         initInput();
         initTranslationsView((RecyclerView) result.findViewById(R.id.translationsRecyclerView));
 
         return result;
+    }
+
+    private void setFromLanguage(String detectedLanguage) {
+        LanguagesAdapterWithAutoDetect adapter = (LanguagesAdapterWithAutoDetect) spinnerFrom.getAdapter();
+        if (adapter == null)
+            return;
+        int position = adapter.getLanguagePosition(detectedLanguage);
+        spinnerFrom.setSelection(position, true);
+        detectedLanguageView.setVisibility(View.GONE);
     }
 
     @Override
@@ -118,8 +136,32 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
         Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
     }
 
-    private TranslateTask translateTask;
+    AdapterView.OnItemSelectedListener onSelectionChangedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            detectLangIfNeededAndTranslate(getCurrentTextToTranslate());
+        }
 
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    };
+
+    private void initLanguagesSpinners(Languages languages) {
+        if (languages == null)
+            return;
+
+        LanguagesAdapterWithAutoDetect from = new LanguagesAdapterWithAutoDetect(getContext(), languages);
+        spinnerFrom.setAdapter(from);
+        spinnerFrom.setOnItemSelectedListener(onSelectionChangedListener);
+
+        LanguagesAdapter to = new LanguagesAdapter(getContext(), languages);
+        spinnerTo.setAdapter(to);
+        spinnerTo.setOnItemSelectedListener(onSelectionChangedListener);
+    }
+
+    private TranslateTask translateTask;
 
     private void detectLangIfNeededAndTranslate(String text) {
         if (needToDetectLanguage())
@@ -136,7 +178,10 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
         getTranslateApi().detectLanguage(text, new OnLanguageDetermineListener() {
             @Override
             public void onLanguageDetermined(String toDetermine, String language) {
-                detectedLanguageView.setText(language);
+                detectedLanguage = language;
+                String displayName = getTranslateApi().getLanguagesCache().getLanguageDisplayName(language);
+                detectedLanguageView.setVisibility(View.VISIBLE);
+                detectedLanguageView.setText(displayName);
                 String to = getSelectedLanguage(spinnerTo);
                 String direction = getDirection(language, to);
                 translate(toDetermine, direction);
@@ -177,17 +222,6 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
             translateTask.cancel(true);
     }
 
-    private void initLanguagesSpinners(Languages languages) {
-        if (languages == null)
-            return;
-
-        LanguagesAdapterWithAutoDetect from = new LanguagesAdapterWithAutoDetect(getContext(), languages);
-        spinnerFrom.setAdapter(from);
-
-        LanguagesAdapter to = new LanguagesAdapter(getContext(), languages);
-        spinnerTo.setAdapter(to);
-    }
-
     private void initTranslationsView(RecyclerView translationsView) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
@@ -219,7 +253,7 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
     }
 
     private String getSelectedLanguage(Spinner languagesSpinner) {
-        return ((LanguagesAdapter) languagesSpinner.getAdapter()).getLanguageForDirection(languagesSpinner.getSelectedItemPosition());
+        return ((LanguagesAdapter) languagesSpinner.getAdapter()).getLanguageId(languagesSpinner.getSelectedItemPosition());
     }
 
     public void onButtonPressed(Uri uri) {

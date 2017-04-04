@@ -72,7 +72,7 @@ public class TranslateApi extends BaseApi {
     }
 
     public void detectLanguage(final String text, final OnLanguageDetermineListener listener) {
-        getDetectLanguageCall(getApiKey()).enqueue(new Callback<DetectedLanguage>() {
+        getDetectLanguageCall(text).enqueue(new Callback<DetectedLanguage>() {
             @Override
             public void onResponse(Call<DetectedLanguage> call, Response<DetectedLanguage> response) {
                 if(response.isSuccessful())

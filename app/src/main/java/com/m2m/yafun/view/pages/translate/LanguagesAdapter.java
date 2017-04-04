@@ -10,15 +10,15 @@ import com.m2m.yafun.model.api.service.result.Languages;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LanguagesAdapter extends ArrayAdapter<String>{
+class LanguagesAdapter extends ArrayAdapter<String>{
 
-    private Languages languages;
-    private List<String> directions;
+    protected Languages languages;
+    List<String> languageIds;
 
-    public LanguagesAdapter(@NonNull Context context, Languages languages) {
+    LanguagesAdapter(@NonNull Context context, Languages languages) {
         super(context, android.R.layout.simple_spinner_dropdown_item);
         this.languages = languages;
-        directions = new ArrayList<>(languages.getLanguages().keySet());
+        languageIds = new ArrayList<>(languages.getLanguages().keySet());
     }
 
     @Override
@@ -29,10 +29,11 @@ public class LanguagesAdapter extends ArrayAdapter<String>{
     @Nullable
     @Override
     public String getItem(int position) {
-        return languages.getLanguagesNames().get(position);
+        String lang = languageIds.get(position);
+        return languages.getLanguages().get(lang);
     }
 
-    public String getLanguageForDirection(int position) {
-        return directions.get(position);
+    public String getLanguageId(int position) {
+        return languageIds.get(position);
     }
 }

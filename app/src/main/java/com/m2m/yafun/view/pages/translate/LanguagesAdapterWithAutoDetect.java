@@ -27,9 +27,13 @@ class LanguagesAdapterWithAutoDetect extends LanguagesAdapter {
     }
 
     @Override
-    public String getLanguageForDirection(int position) {
+    public String getLanguageId(int position) {
         if (position == 0)
             return null;
-        return super.getLanguageForDirection(position - 1);
+        return super.getLanguageId(position - 1);
+    }
+
+    int getLanguagePosition(String lang) {
+        return languageIds.indexOf(lang) + 1;
     }
 }
