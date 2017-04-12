@@ -25,4 +25,13 @@ public class TranslateResult {
     public List<String> getTranslatedText() {
         return text;
     }
+
+    public String getTranslationTotalString() {
+        String result = "";
+        for (String translation: text) {
+            result += translation;
+            result += "\n";
+        }
+        return result;
+    }
 }

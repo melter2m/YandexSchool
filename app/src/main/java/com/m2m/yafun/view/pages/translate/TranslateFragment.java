@@ -1,12 +1,8 @@
 package com.m2m.yafun.view.pages.translate;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -25,15 +21,14 @@ import com.m2m.yafun.model.api.service.OnLanguagesReceivedListener;
 import com.m2m.yafun.model.api.service.OnTranslateListener;
 import com.m2m.yafun.model.api.service.result.Languages;
 import com.m2m.yafun.model.api.service.result.TranslateResult;
-import com.m2m.yafun.view.OnFragmentInteractionListener;
+import com.m2m.yafun.model.db.entities.HistoryItem;
+import com.m2m.yafun.model.db.gateway.IHistoryGateway;
 import com.m2m.yafun.view.pages.Page;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
 
 public class TranslateFragment extends Page implements OnLanguagesReceivedListener, OnTranslateListener {
-
-    private OnFragmentInteractionListener mListener;
 
     private Spinner spinnerFrom;
     private Spinner spinnerTo;
@@ -42,13 +37,13 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
     private EditText textToTranslate;
     private ImageView clear;
 
-    private TranslationsAdapter translationsAdapter;
-
     private String detectedLanguage = "en";
 
-    public TranslateFragment() {
-        // Required empty public constructor
-    }
+    private TextView translationContent;
+    private ImageView favoriteIndicator;
+    private CardView translationView;
+    private TranslateResult currentTranslateResult;
+    private String translatedText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,10 +59,35 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
         });
         textToTranslate = (EditText) result.findViewById(R.id.textToTranslate);
         clear = (ImageView) result.findViewById(R.id.clearInput);
+
+        translationView = (CardView) result.findViewById(R.id.cvTranslationView);
+        translationContent = (TextView) result.findViewById(R.id.translationContent);
+        favoriteIndicator = (ImageView) result.findViewById(R.id.imageViewFavorite);
+        favoriteIndicator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeFavoriteState();
+            }
+        });
         initInput();
-        initTranslationsView((RecyclerView) result.findViewById(R.id.translationsRecyclerView));
+        setEmptyTranslation();
 
         return result;
+    }
+
+    private void changeFavoriteState() {
+        if (translatedText == null || currentTranslateResult == null)
+            return;
+        IHistoryGateway gateway = getDatabaseContext().createHistoryGateway();
+        HistoryItem fromHistory = gateway.getItem(translatedText, currentTranslateResult.getTranslateDirection());
+        if (fromHistory == null) {
+            gateway.insertItem(new HistoryItem(Calendar.getInstance(), translatedText, currentTranslateResult.getTranslateDirection(), currentTranslateResult.getTranslatedText(), true));
+            setFavoriteIndicator(true);
+        } else {
+            gateway.setFavorite(fromHistory, !fromHistory.isFavorite());
+            setFavoriteIndicator(!fromHistory.isFavorite());
+        }
+        notifyOthersToUpdate();
     }
 
     private void setFromLanguage(String detectedLanguage) {
@@ -101,7 +121,7 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
             public void afterTextChanged(Editable s) {
                 if (s.length() == 0) {
                     clear.setVisibility(View.GONE);
-                    updateTranslation(new ArrayList<String>());
+                    setEmptyTranslation();
                     return;
                 }
                 if (s.length() == 1)
@@ -204,10 +224,40 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
     @Override
     public void onTranslated(String toTranslate, TranslateResult translateResult) {
         String currentText = getCurrentTextToTranslate();
+        this.translatedText = toTranslate;
+        this.currentTranslateResult = translateResult;
         if (currentText.equals(toTranslate))
-            updateTranslation(translateResult.getTranslatedText());
+            updateTranslation(toTranslate, translateResult);
         else
-            updateTranslation(new ArrayList<String>());
+            setEmptyTranslation();
+    }
+
+    private void setEmptyTranslation() {
+        updateTranslation("", new TranslateResult(-1, "", new ArrayList<String>()));
+    }
+
+    private void updateTranslation(String toTranslate, TranslateResult translateResult) {
+        if (translateResult.getTranslatedText().size() == 0 || toTranslate.isEmpty())
+            translationView.setVisibility(View.GONE);
+        else
+            translationView.setVisibility(View.VISIBLE);
+
+        translationContent.setText(translateResult.getTranslationTotalString());
+        IHistoryGateway gateway = getDatabaseContext().createHistoryGateway();
+        HistoryItem fromHistory = gateway.getItem(toTranslate, translateResult.getTranslateDirection());
+        if (fromHistory == null || !fromHistory.translationEqual(translateResult.getTranslatedText()) || !fromHistory.isFavorite())
+            setFavoriteIndicator(false);
+        else
+            setFavoriteIndicator(true);
+
+        notifyOthersToUpdate();
+    }
+
+    private void setFavoriteIndicator(boolean isFavorite) {
+        if (isFavorite)
+            favoriteIndicator.setImageResource(android.R.drawable.btn_star_big_on);
+        else
+            favoriteIndicator.setImageResource(android.R.drawable.btn_star_big_off);
     }
 
     @Override
@@ -222,19 +272,6 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
             translateTask.cancel(true);
     }
 
-    private void initTranslationsView(RecyclerView translationsView) {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-
-        translationsAdapter = new TranslationsAdapter(new ArrayList<String>());
-        translationsView.setAdapter(translationsAdapter);
-        translationsView.setLayoutManager(layoutManager);
-        translationsView.setItemAnimator(itemAnimator);
-    }
-
-    private void updateTranslation(List<String> translation) {
-        translationsAdapter.update(translation);
-    }
 
     private String getCurrentTextToTranslate() {
         return textToTranslate.getText().toString();
@@ -256,26 +293,9 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
         return ((LanguagesAdapter) languagesSpinner.getAdapter()).getLanguageId(languagesSpinner.getSelectedItemPosition());
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-        }
-    }
+    public void update() {
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
-
 }

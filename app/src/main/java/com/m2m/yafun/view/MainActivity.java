@@ -1,14 +1,10 @@
 package com.m2m.yafun.view;
 
-import android.net.Uri;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -22,11 +18,15 @@ import android.widget.TextView;
 import com.m2m.yafun.R;
 import com.m2m.yafun.view.pages.SectionsPagerAdapter;
 
-public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener{
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements OnUpdateListener, Updater {
 
     private SectionsPagerAdapter sectionsPagerAdapter;
 
     private ViewPager viewPager;
+    private List<OnUpdateListener> updateListeners;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        updateListeners = new ArrayList<>();
 
     }
 
@@ -72,8 +74,25 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void update() {
 
+    }
+
+    @Override
+    public void notifyOthersToUpdate() {
+        for (OnUpdateListener listener: updateListeners) {
+            listener.update();
+        }
+    }
+
+    @Override
+    public void registerUpdateListener(OnUpdateListener listener) {
+        updateListeners.add(listener);
+    }
+
+    @Override
+    public void unRegisterUpdateListener(OnUpdateListener listener) {
+        updateListeners.remove(listener);
     }
 
     /**

@@ -1,8 +1,11 @@
 package com.m2m.yafun.model.api.service.result;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Languages {
 
@@ -18,6 +21,7 @@ public class Languages {
 
     private final List<String> dirs;
     private final LinkedHashMap<String, String> langs;
+    private boolean isSorted = false;
 
     private List<Direction> parsedDirections;
     private List<String> languagesNames;
@@ -25,6 +29,7 @@ public class Languages {
     public Languages(List<String> directions, LinkedHashMap<String, String> languages) {
         this.dirs = directions;
         this.langs = languages;
+        sortIfNeeded();
     }
 
     public List<String> getDirections() {
@@ -32,7 +37,27 @@ public class Languages {
     }
 
     public LinkedHashMap<String, String> getLanguages() {
+        sortIfNeeded();
         return langs;
+    }
+
+    private void sortIfNeeded() {
+        if (isSorted)
+            return;
+        List<Map.Entry<String, String>> entries = new ArrayList<>(langs.entrySet());
+
+        Collections.sort(entries, new Comparator<Map.Entry<String, String>>() {
+            @Override
+            public int compare(Map.Entry<String, String> lhs, Map.Entry<String, String> rhs) {
+                return lhs.getValue().compareTo(rhs.getValue());
+            }
+        });
+
+        langs.clear();
+        for(Map.Entry<String, String> e : entries) {
+            langs.put(e.getKey(), e.getValue());
+        }
+        isSorted = true;
     }
 
     public List<String> getLanguagesNames() {

@@ -32,6 +32,14 @@ public class HistoryGateway extends DatedEntityGateway<HistoryItem> implements I
     }
 
     @Override
+    public HistoryItem getItem(String originalText, String direction) {
+        List<HistoryItem> all = getItems(null, DbScheme.History.Text + " = ? AND " + DbScheme.History.Direction + " = ?", new String[] {originalText, direction}, null, null, null);
+        if (all.size() == 0)
+            return null;
+        return all.get(0);
+    }
+
+    @Override
     protected void fillContentValuesWithSpecificData(HistoryItem item, ContentValues cv) {
         cv.put(DbScheme.History.Direction, item.getDirection());
         cv.put(DbScheme.History.Text, item.getText());

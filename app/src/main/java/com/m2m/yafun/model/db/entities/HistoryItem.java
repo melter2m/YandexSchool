@@ -31,11 +31,30 @@ public class HistoryItem extends DatedEntity {
         return direction;
     }
 
+    public boolean translationEqual(List<String> otherTranslation) {
+        if (otherTranslation == null)
+            return false;
+        for (String translation: otherTranslation) {
+            if (!this.translation.contains(translation))
+                return false;
+        }
+        return true;
+    }
+
     public List<String> getTranslation() {
         return translation;
     }
 
     public boolean isFavorite() {
         return isFavorite;
+    }
+
+    public String getTranslationTotalString() {
+        String result = "";
+        for (String item: translation) {
+            result += item;
+            result += "\n";
+        }
+        return result;
     }
 }

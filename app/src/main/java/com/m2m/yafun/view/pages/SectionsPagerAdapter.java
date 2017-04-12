@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.m2m.yafun.view.MainActivity;
+import com.m2m.yafun.view.pages.history.HistoryPage;
 import com.m2m.yafun.view.pages.translate.TranslateFragment;
 
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -19,6 +20,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return new TranslateFragment();
             case 1:
+                return new HistoryPage();
             case 2:
                 return MainActivity.PlaceholderFragment.newInstance(position + 1);
         }
