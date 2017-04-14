@@ -1,5 +1,6 @@
 package com.m2m.yafun.view.pages.translate;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
@@ -28,7 +29,7 @@ import com.m2m.yafun.view.pages.Page;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class TranslateFragment extends Page implements OnLanguagesReceivedListener, OnTranslateListener {
+public class TranslatePage extends Page implements OnLanguagesReceivedListener, OnTranslateListener {
 
     private Spinner spinnerFrom;
     private Spinner spinnerTo;
@@ -45,11 +46,20 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
     private TranslateResult currentTranslateResult;
     private String translatedText;
 
+    private AddToHistoryTask addToHistoryTask;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View result = inflater.inflate(R.layout.fragment_translate, container, false);
         spinnerFrom = (Spinner) result.findViewById(R.id.spinnerLanguageFrom);
         spinnerTo = (Spinner) result.findViewById(R.id.spinnerLanguageTo);
+        result.findViewById(R.id.exchangeLang).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exchangeLanguages();
+            }
+        });
+
         detectedLanguageView = (TextView) result.findViewById(R.id.detectedLanguage);
         detectedLanguageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,28 +85,31 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
         return result;
     }
 
-    private void changeFavoriteState() {
-        if (translatedText == null || currentTranslateResult == null)
+    private void exchangeLanguages() {
+        String from = getSelectedLanguage(spinnerFrom);
+        if (from == null)
+            from = detectedLanguage;
+        if (from == null)
             return;
-        IHistoryGateway gateway = getDatabaseContext().createHistoryGateway();
-        HistoryItem fromHistory = gateway.getItem(translatedText, currentTranslateResult.getTranslateDirection());
-        if (fromHistory == null) {
-            gateway.insertItem(new HistoryItem(Calendar.getInstance(), translatedText, currentTranslateResult.getTranslateDirection(), currentTranslateResult.getTranslatedText(), true));
-            setFavoriteIndicator(true);
-        } else {
-            gateway.setFavorite(fromHistory, !fromHistory.isFavorite());
-            setFavoriteIndicator(!fromHistory.isFavorite());
-        }
-        notifyOthersToUpdate();
+
+        String to = getSelectedLanguage(spinnerTo);
+        setFromLanguage(to);
+        setLanguageForSpinner(spinnerTo, from);
+        translate(getCurrentTextToTranslate(), getSelectedDirection());
     }
 
     private void setFromLanguage(String detectedLanguage) {
-        LanguagesAdapterWithAutoDetect adapter = (LanguagesAdapterWithAutoDetect) spinnerFrom.getAdapter();
+        if (setLanguageForSpinner(spinnerFrom, detectedLanguage))
+            detectedLanguageView.setVisibility(View.GONE);
+    }
+
+    private boolean setLanguageForSpinner(Spinner spinner, String language) {
+        LanguagesAdapter adapter = (LanguagesAdapter) spinner.getAdapter();
         if (adapter == null)
-            return;
-        int position = adapter.getLanguagePosition(detectedLanguage);
-        spinnerFrom.setSelection(position, true);
-        detectedLanguageView.setVisibility(View.GONE);
+            return false;
+        int position = adapter.getLanguagePosition(language);
+        spinner.setSelection(position, true);
+        return true;
     }
 
     @Override
@@ -109,7 +122,7 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
         textToTranslate.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                cancelAddToHistoryTask();
             }
 
             @Override
@@ -230,6 +243,42 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
             updateTranslation(toTranslate, translateResult);
         else
             setEmptyTranslation();
+        startAddToHistoryTask();
+    }
+
+    private void startAddToHistoryTask() {
+        cancelAddToHistoryTask();
+        addToHistoryTask = new AddToHistoryTask(this, translatedText, currentTranslateResult);
+        addToHistoryTask.execute();
+    }
+
+    private void cancelAddToHistoryTask() {
+        if (addToHistoryTask != null && addToHistoryTask.getStatus() == AsyncTask.Status.RUNNING)
+            addToHistoryTask.cancel(true);
+    }
+
+    private void changeFavoriteState() {
+        if (translatedText == null || currentTranslateResult == null)
+            return;
+        IHistoryGateway gateway = getDatabaseContext().createHistoryGateway();
+        HistoryItem fromHistory = gateway.getItem(translatedText, currentTranslateResult.getTranslateDirection());
+        if (fromHistory == null) {
+            addToHistory(gateway, translatedText, currentTranslateResult, true);
+            setFavoriteIndicator(true);
+        } else {
+            gateway.setFavorite(fromHistory, !fromHistory.isFavorite());
+            setFavoriteIndicator(!fromHistory.isFavorite());
+        }
+        notifyOthersToUpdate();
+    }
+
+    public void addToHistory(String text, TranslateResult result, boolean isFavorite) {
+        IHistoryGateway gateway = getDatabaseContext().createHistoryGateway();
+        addToHistory(gateway, text, result, isFavorite);
+    }
+
+    private void addToHistory(IHistoryGateway gateway, String text, TranslateResult result, boolean isFavorite) {
+        gateway.insertItem(new HistoryItem(Calendar.getInstance(), text, result.getTranslateDirection(), result.getTranslatedText(), isFavorite));
     }
 
     private void setEmptyTranslation() {
@@ -272,7 +321,6 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
             translateTask.cancel(true);
     }
 
-
     private String getCurrentTextToTranslate() {
         return textToTranslate.getText().toString();
     }
@@ -292,7 +340,6 @@ public class TranslateFragment extends Page implements OnLanguagesReceivedListen
     private String getSelectedLanguage(Spinner languagesSpinner) {
         return ((LanguagesAdapter) languagesSpinner.getAdapter()).getLanguageId(languagesSpinner.getSelectedItemPosition());
     }
-
 
     @Override
     public void update() {

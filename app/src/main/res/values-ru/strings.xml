@@ -5,4 +5,7 @@
 
     <string name="translate_input_hint">Текст для перевода</string>
     <string name="detect_language">Авто</string>
+    <string name="translate_page">Перевод</string>
+    <string name="history_page">История</string>
+    <string name="favorites_page">Избранное</string>
 </resources>

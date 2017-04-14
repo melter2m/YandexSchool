@@ -1,36 +1,41 @@
 package com.m2m.yafun.view.pages;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.m2m.yafun.R;
 import com.m2m.yafun.view.MainActivity;
+import com.m2m.yafun.view.pages.history.FavoritesPage;
 import com.m2m.yafun.view.pages.history.HistoryPage;
-import com.m2m.yafun.view.pages.translate.TranslateFragment;
+import com.m2m.yafun.view.pages.translate.TranslatePage;
 
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-    public SectionsPagerAdapter(FragmentManager fm) {
+    private final Context context;
+
+    public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
+        this.context = context;
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return new TranslateFragment();
+                return new TranslatePage();
             case 1:
                 return new HistoryPage();
             case 2:
-                return MainActivity.PlaceholderFragment.newInstance(position + 1);
+                return new FavoritesPage();
         }
 
-        return MainActivity.PlaceholderFragment.newInstance(position + 1);
+        return null;
     }
 
     @Override
     public int getCount() {
-        // Show 3 total pages.
         return 3;
     }
 
@@ -38,11 +43,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position) {
             case 0:
-                return "SECTION 1";
+                return context.getString(R.string.translate_page);
             case 1:
-                return "SECTION 2";
+                return context.getString(R.string.history_page);
             case 2:
-                return "SECTION 3";
+                return context.getString(R.string.favorites_page);
         }
         return null;
     }

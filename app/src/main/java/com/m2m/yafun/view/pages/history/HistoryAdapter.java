@@ -8,72 +8,86 @@ import android.view.ViewGroup;
 import com.m2m.yafun.R;
 import com.m2m.yafun.model.db.entities.HistoryItem;
 import com.m2m.yafun.model.db.gateway.IHistoryGateway;
-import com.m2m.yafun.view.TranslateApplication;
-import com.m2m.yafun.view.pages.translate.TranslationViewHolder;
+import com.m2m.yafun.view.pages.history.helper.ItemTouchHelperAdapter;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-public class HistoryAdapter extends RecyclerView.Adapter<TranslationViewHolder> {
+class HistoryAdapter extends RecyclerView.Adapter<HistoryItemViewHolder> implements ItemTouchHelperAdapter {
 
     private final HistoryPage historyPage;
     private List<HistoryItem> historyItems;
 
-    public HistoryAdapter(HistoryPage historyPage, List<HistoryItem> historyItems) {
+    HistoryAdapter(HistoryPage historyPage, List<HistoryItem> historyItems) {
         this.historyPage = historyPage;
         this.historyItems = historyItems;
-        sortItems();
     }
 
-    public void update(List<HistoryItem> historyItems) {
+    void update(List<HistoryItem> historyItems) {
         this.historyItems = historyItems;
         notifyDataSetChanged();
     }
 
     @Override
-    public TranslationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public HistoryItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.translation_item, parent, false);
-        return new TranslationViewHolder(v);
+        return new HistoryItemViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(final TranslationViewHolder holder, int position) {
+    public void onBindViewHolder(final HistoryItemViewHolder holder, int position) {
         HistoryItem item = historyItems.get(position);
+        holder.originalText.setText(item.getText());
+        holder.direction.setText(item.getDirection());
         holder.translationContent.setText(item.getTranslationTotalString());
         holder.favorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 changeFavoriteState(holder.getAdapterPosition());
-
             }
         });
 
-        if (item.isFavorite())
+        setFavoriteView(holder, item.isFavorite());
+    }
+
+    private void setFavoriteView(HistoryItemViewHolder holder, boolean isFavorite) {
+        if (isFavorite)
             holder.favorite.setImageResource(android.R.drawable.btn_star_big_on);
         else
             holder.favorite.setImageResource(android.R.drawable.btn_star_big_off);
     }
 
-    private void changeFavoriteState(int position) {
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        return false;
+    }
+
+    @Override
+    public void onItemDismiss(int position, SwipeDirection direction) {
+        try {
+            if (direction == SwipeDirection.Left || direction == SwipeDirection.Right)
+                deleteItem(position);
+            else
+                notifyItemChanged(position);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void deleteItem(int position) {
+        HistoryItem item = historyItems.get(position);
+        IHistoryGateway gateway = historyPage.getDatabaseContext().createHistoryGateway();
+        gateway.deleteItem(item.getId());
+        historyItems.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    private HistoryItem changeFavoriteState(int position) {
         HistoryItem item = historyItems.get(position);
         IHistoryGateway gateway = historyPage.getDatabaseContext().createHistoryGateway();
         item = gateway.setFavorite(item, !item.isFavorite());
-        historyItems.set(position, item);
-        sortItems();
-        notifyDataSetChanged();
-    }
-
-    private void sortItems() {
-        Collections.sort(historyItems, new Comparator<HistoryItem>() {
-            @Override
-            public int compare(HistoryItem o1, HistoryItem o2) {
-                if (o1.isFavorite() == o2.isFavorite())
-                    return 0;
-                return o1.isFavorite() && !o2.isFavorite() ? -1 : 1;
-            }
-        });
+        historyItems.remove(position);
+        historyItems.add(position, item);
+        notifyItemChanged(position);
+        return item;
     }
 
     @Override

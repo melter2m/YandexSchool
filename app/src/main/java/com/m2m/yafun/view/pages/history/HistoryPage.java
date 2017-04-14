@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,11 +34,16 @@ public class HistoryPage extends Page {
         translationsView.setAdapter(historyAdapter);
         translationsView.setLayoutManager(layoutManager);
         translationsView.setItemAnimator(itemAnimator);
+        ItemTouchHelper.Callback callback = new HistoryItemTouchCallback(historyAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(translationsView);
     }
 
     @Override
     public void update() {
+        if (historyAdapter == null)
+            return;
         List<HistoryItem> items = getDatabaseContext().createHistoryGateway().getAllItems();
-        historyAdapter = new HistoryAdapter(this, items);
+        historyAdapter.update(items);
     }
 }

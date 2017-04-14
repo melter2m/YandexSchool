@@ -35,6 +35,10 @@ class LanguagesAdapter extends ArrayAdapter<String>{
         return languages.getLanguages().get(lang);
     }
 
+    int getLanguagePosition(String lang) {
+        return languageIds.indexOf(lang);
+    }
+
     public String getLanguageId(int position) {
         return languageIds.get(position);
     }

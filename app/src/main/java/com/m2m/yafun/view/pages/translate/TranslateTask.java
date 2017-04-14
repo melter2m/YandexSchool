@@ -1,19 +1,18 @@
 package com.m2m.yafun.view.pages.translate;
 
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import com.m2m.yafun.model.api.service.OnTranslateListener;
 import com.m2m.yafun.model.api.service.result.TranslateResult;
 
 class TranslateTask extends AsyncTask<String, Void, Void> {
 
-    private TranslateFragment translateFragment;
+    private TranslatePage translatePage;
 
     private String toTranslateCache;
 
-    TranslateTask(TranslateFragment translateFragment) {
-        this.translateFragment = translateFragment;
+    TranslateTask(TranslatePage translatePage) {
+        this.translatePage = translatePage;
     }
 
     @Override
@@ -24,13 +23,13 @@ class TranslateTask extends AsyncTask<String, Void, Void> {
         String direction = params[1];
         if (toTranslateCache == null || toTranslateCache.length() == 0 || direction == null || direction.length() == 0)
             return null;
-        translateFragment.getTranslateApi().translate(toTranslateCache, direction, new OnTranslateListener() {
+        translatePage.getTranslateApi().translate(toTranslateCache, direction, new OnTranslateListener() {
             @Override
             public void onTranslated(final String toTranslate, final TranslateResult translateResult) {
-                translateFragment.getActivity().runOnUiThread(new Runnable() {
+                translatePage.getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        translateFragment.onTranslated(toTranslate, translateResult);
+                        translatePage.onTranslated(toTranslate, translateResult);
                     }
                 });
 
@@ -38,10 +37,10 @@ class TranslateTask extends AsyncTask<String, Void, Void> {
 
             @Override
             public void onTranslateError(final String error) {
-                translateFragment.getActivity().runOnUiThread(new Runnable() {
+                translatePage.getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        translateFragment.onTranslateError(error);
+                        translatePage.onTranslateError(error);
                     }
                 });
 
