@@ -1,4 +1,4 @@
-package com.m2m.yafun.view.pages.history;
+package com.m2m.yafun.view.pages.history.base;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

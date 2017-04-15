@@ -15,6 +15,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     private final Context context;
 
+    private final static int TranslatePageIndex = 0;
+    private final static int HistoryPageIndex = TranslatePageIndex + 1;
+    private final static int FavoritesPageIndex = HistoryPageIndex + 1;
+
+
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
         this.context = context;
@@ -23,16 +28,30 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         switch (position) {
-            case 0:
+            case TranslatePageIndex:
                 return new TranslatePage();
-            case 1:
+            case HistoryPageIndex:
                 return new HistoryPage();
-            case 2:
+            case FavoritesPageIndex:
                 return new FavoritesPage();
         }
 
         return null;
     }
+
+    public int getPageIconId(int position) {
+        switch (position) {
+            case TranslatePageIndex:
+                return R.drawable.exchange;
+            case HistoryPageIndex:
+                return R.drawable.exchange;
+            case FavoritesPageIndex:
+                return R.drawable.exchange;
+            default:
+                return 0;
+        }
+    }
+
 
     @Override
     public int getCount() {
@@ -42,11 +61,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         switch (position) {
-            case 0:
+            case TranslatePageIndex:
                 return context.getString(R.string.translate_page);
-            case 1:
+            case HistoryPageIndex:
                 return context.getString(R.string.history_page);
-            case 2:
+            case FavoritesPageIndex:
                 return context.getString(R.string.favorites_page);
         }
         return null;

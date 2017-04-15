@@ -3,12 +3,13 @@ package com.m2m.yafun.view.pages.history;
 import com.m2m.yafun.model.db.entities.HistoryItem;
 import com.m2m.yafun.model.db.gateway.IHistoryGateway;
 import com.m2m.yafun.view.pages.history.base.HistoryBaseAdapter;
+import com.m2m.yafun.view.pages.history.base.HistoryBasePage;
 
 import java.util.List;
 
-class HistoryAdapter extends HistoryBaseAdapter {
+public class FavoritesAdapter extends HistoryBaseAdapter {
 
-    HistoryAdapter(HistoryPage historyPage, List<HistoryItem> historyItems) {
+    protected FavoritesAdapter(HistoryBasePage historyPage, List<HistoryItem> historyItems) {
         super(historyPage, historyItems);
     }
 
@@ -16,10 +17,8 @@ class HistoryAdapter extends HistoryBaseAdapter {
     protected void changeFavoriteState(int position) {
         HistoryItem item = historyItems.get(position);
         IHistoryGateway gateway = historyPage.getDatabaseContext().createHistoryGateway();
-        item = gateway.setFavorite(item, !item.isFavorite());
+        gateway.setFavorite(item, !item.isFavorite());
         historyItems.remove(position);
-        historyItems.add(position, item);
-        notifyItemChanged(position);
+        notifyItemRemoved(position);
     }
-
 }

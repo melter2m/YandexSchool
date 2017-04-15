@@ -24,9 +24,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnUpdateListener, Updater {
 
-    private SectionsPagerAdapter sectionsPagerAdapter;
-
-    private ViewPager viewPager;
     private List<OnUpdateListener> updateListeners;
 
     @Override
@@ -36,18 +33,27 @@ public class MainActivity extends AppCompatActivity implements OnUpdateListener,
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        initTabs();
+        updateListeners = new ArrayList<>();
+    }
+
+    private void initTabs() {
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
-
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         // Set up the ViewPager with the sections adapter.
-        viewPager = (ViewPager) findViewById(R.id.container);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setAdapter(sectionsPagerAdapter);
-        
+
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        updateListeners = new ArrayList<>();
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            if (tab != null)
+                tab.setIcon(sectionsPagerAdapter.getPageIconId(i));
+        }
     }
 
     @Override

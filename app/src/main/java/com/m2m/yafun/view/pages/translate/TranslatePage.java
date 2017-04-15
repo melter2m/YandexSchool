@@ -278,6 +278,9 @@ public class TranslatePage extends Page implements OnLanguagesReceivedListener, 
     }
 
     private void addToHistory(IHistoryGateway gateway, String text, TranslateResult result, boolean isFavorite) {
+        HistoryItem fromHistory = gateway.getItem(text, result.getTranslateDirection());
+        if (fromHistory != null)
+            return;
         gateway.insertItem(new HistoryItem(Calendar.getInstance(), text, result.getTranslateDirection(), result.getTranslatedText(), isFavorite));
     }
 
