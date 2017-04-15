@@ -41,6 +41,12 @@
             android:layout_weight="5" />
     </LinearLayout>
 
+    <TextView
+        android:text="@string/translated_with_yandex"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewYaLic" />
+
     <android.support.v7.widget.CardView
         android:id="@+id/detectedLanguageCard"
         android:layout_width="match_parent"

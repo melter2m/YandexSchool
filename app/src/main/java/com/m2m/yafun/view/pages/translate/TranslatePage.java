@@ -24,6 +24,7 @@ import com.m2m.yafun.model.api.service.result.Languages;
 import com.m2m.yafun.model.api.service.result.TranslateResult;
 import com.m2m.yafun.model.db.entities.HistoryItem;
 import com.m2m.yafun.model.db.gateway.IHistoryGateway;
+import com.m2m.yafun.view.YaLicenseInitializer;
 import com.m2m.yafun.view.pages.Page;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class TranslatePage extends Page implements OnLanguagesReceivedListener, 
                 exchangeLanguages();
             }
         });
-
+        YaLicenseInitializer.initClickableTextView((TextView) result.findViewById(R.id.textViewYaLic));
         detectedLanguageView = (TextView) result.findViewById(R.id.detectedLanguage);
         detectedLanguageView.setOnClickListener(new View.OnClickListener() {
             @Override
