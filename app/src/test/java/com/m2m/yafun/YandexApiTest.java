@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.util.Locale;
 
+import retrofit2.Response;
+
 import static org.junit.Assert.*;
 
 public class YandexApiTest {
@@ -46,7 +48,9 @@ public class YandexApiTest {
     }
 
     private void checkTranslation(String toTranslate, String direction, String expected) {
-        TranslateResult result = api.translateSync(toTranslate, direction);
+        Response<TranslateResult> response = api.translateSync(toTranslate, direction);
+        assertTrue(response.isSuccessful());
+        TranslateResult result = response.body();
         assertNotNull(result);
         assertEquals(200, result.getResultCode());
         assertTrue(result.getTranslatedText().size() > 0);

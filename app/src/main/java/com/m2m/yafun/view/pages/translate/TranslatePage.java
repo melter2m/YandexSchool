@@ -313,9 +313,13 @@ public class TranslatePage extends Page implements OnLanguagesReceivedListener, 
             favoriteIndicator.setImageResource(android.R.drawable.btn_star_big_off);
     }
 
+    private Toast errorView;
     @Override
     public void onTranslateError(String error) {
-        Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+        if (errorView != null)
+            errorView.cancel();
+        errorView = Toast.makeText(getContext(), error, Toast.LENGTH_LONG);
+        errorView.show();
     }
 
     @Override

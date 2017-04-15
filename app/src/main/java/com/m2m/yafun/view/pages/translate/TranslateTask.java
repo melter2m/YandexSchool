@@ -2,51 +2,67 @@ package com.m2m.yafun.view.pages.translate;
 
 import android.os.AsyncTask;
 
-import com.m2m.yafun.model.api.service.OnTranslateListener;
 import com.m2m.yafun.model.api.service.result.TranslateResult;
+import com.m2m.yafun.model.db.entities.HistoryItem;
+import com.m2m.yafun.model.db.gateway.IHistoryGateway;
 
-class TranslateTask extends AsyncTask<String, Void, Void> {
+import java.io.IOException;
+
+import retrofit2.Response;
+
+class TranslateTask extends AsyncTask<String, Void, TranslateResult> {
 
     private TranslatePage translatePage;
-
-    private String toTranslateCache;
+    private String toTranslate;
+    private String error;
 
     TranslateTask(TranslatePage translatePage) {
         this.translatePage = translatePage;
     }
 
     @Override
-    protected Void doInBackground(String... params) {
+    protected TranslateResult doInBackground(String... params) {
         if (params.length < 2)
             return null;
-        toTranslateCache = params[0];
+        toTranslate = params[0];
         String direction = params[1];
-        if (toTranslateCache == null || toTranslateCache.length() == 0 || direction == null || direction.length() == 0)
+        if (toTranslate == null || toTranslate.length() == 0 || direction == null || direction.length() == 0)
             return null;
-        translatePage.getTranslateApi().translate(toTranslateCache, direction, new OnTranslateListener() {
-            @Override
-            public void onTranslated(final String toTranslate, final TranslateResult translateResult) {
-                translatePage.getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        translatePage.onTranslated(toTranslate, translateResult);
-                    }
-                });
+        TranslateResult cache = tryToGetFromHistory(toTranslate, direction);
+        if (cache != null)
+            return cache;
 
-            }
+        Response<TranslateResult> result = translatePage.getTranslateApi().translateSync(toTranslate, direction);
+        if (result == null)
+            return null;
 
-            @Override
-            public void onTranslateError(final String error) {
-                translatePage.getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        translatePage.onTranslateError(error);
-                    }
-                });
+        if (result.isSuccessful())
+            return result.body();
 
-            }
-        });
+        try {
+            error = result.errorBody().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
+    @Override
+    protected void onPostExecute(TranslateResult result) {
+        if (result == null && error != null) {
+            translatePage.onTranslateError(error);
+            return;
+        }
+        if (result == null)
+            return;
+        translatePage.onTranslated(toTranslate, result);
+    }
+
+    private TranslateResult tryToGetFromHistory(String toTranslate, String direction) {
+        IHistoryGateway gateway = translatePage.getDatabaseContext().createHistoryGateway();
+        HistoryItem item = gateway.getItem(toTranslate, direction);
+        if (item == null)
+            return null;
+        return new TranslateResult(0, item.getDirection(), item.getTranslation());
+    }
 }

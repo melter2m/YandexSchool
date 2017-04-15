@@ -1,5 +1,6 @@
 package com.m2m.yafun.model.api.service.result;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TranslateResult {
@@ -19,15 +20,21 @@ public class TranslateResult {
     }
 
     public String getTranslateDirection() {
+        if (lang == null)
+            return "";
         return lang;
     }
 
     public List<String> getTranslatedText() {
+        if (text == null)
+            return new ArrayList<>();
         return text;
     }
 
     public String getTranslationTotalString() {
         String result = "";
+        if (text == null)
+            return result;
         for (String translation: text) {
             result += translation;
             result += "\n";

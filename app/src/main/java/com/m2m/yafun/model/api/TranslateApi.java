@@ -120,9 +120,9 @@ public class TranslateApi extends BaseApi {
         });
     }
 
-    public TranslateResult translateSync(String text, String translateDirection) {
+    public Response<TranslateResult> translateSync(String text, String translateDirection) {
         try {
-            return getTranslateCall(text, translateDirection).execute().body();
+            return getTranslateCall(text, translateDirection).execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
