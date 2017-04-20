@@ -99,7 +99,6 @@ public abstract class TableGateway<T extends EntityBase> implements ITableGatewa
         }
         c.close();
 
-        db.close();
         return result;
     }
 
@@ -117,7 +116,6 @@ public abstract class TableGateway<T extends EntityBase> implements ITableGatewa
             } while (c.moveToNext());
         }
         c.close();
-        db.close();
         return result;
     }
 

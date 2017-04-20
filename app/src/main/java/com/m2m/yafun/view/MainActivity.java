@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.m2m.yafun.R;
 import com.m2m.yafun.view.pages.SectionsPagerAdapter;
@@ -36,6 +37,13 @@ public class MainActivity extends AppCompatActivity implements OnUpdateListener,
 
         initTabs();
         updateListeners = new ArrayList<>();
+        checkNetworkState();
+    }
+
+    private void checkNetworkState() {
+        if (NetworkUtils.isNetworkAvailable(this))
+            return;
+        Toast.makeText(this, R.string.network_is_not_available, Toast.LENGTH_LONG).show();
     }
 
     private void initTabs() {
@@ -54,22 +62,6 @@ public class MainActivity extends AppCompatActivity implements OnUpdateListener,
             if (tab != null)
                 tab.setIcon(sectionsPagerAdapter.getPageIconId(i));
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

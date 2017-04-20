@@ -34,7 +34,7 @@ class AddToHistoryTask extends AsyncTask<String, Void, Void> {
         try {
             translatePage.addToHistory(original, translateResult, false);
             translatePage.notifyOthersToUpdate();
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | NullPointerException e) {
             e.printStackTrace();
         }
     }

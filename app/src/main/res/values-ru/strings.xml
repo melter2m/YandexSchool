@@ -9,4 +9,5 @@
     <string name="history_page">История</string>
     <string name="favorites_page">Избранное</string>
     <string name="translated_with_yandex">Переведено сервисом <a href="http://translate.yandex.ru/">«Яндекс.Переводчик»</a></string>
+    <string name="network_is_not_available">Сеть не доступна</string>
 </resources>

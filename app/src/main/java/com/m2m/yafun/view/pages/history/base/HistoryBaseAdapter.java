@@ -43,6 +43,7 @@ public abstract class HistoryBaseAdapter extends RecyclerView.Adapter<HistoryIte
             @Override
             public void onClick(View v) {
                 changeFavoriteState(holder.getAdapterPosition());
+                notifyOthers();
             }
         });
 
@@ -78,6 +79,11 @@ public abstract class HistoryBaseAdapter extends RecyclerView.Adapter<HistoryIte
         gateway.deleteItem(item.getId());
         historyItems.remove(position);
         notifyItemRemoved(position);
+        notifyOthers();
+    }
+
+    private void notifyOthers() {
+        historyPage.notifyOthersToUpdate();
     }
 
     protected abstract void changeFavoriteState(int position);

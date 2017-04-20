@@ -19,7 +19,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     private final static int HistoryPageIndex = TranslatePageIndex + 1;
     private final static int FavoritesPageIndex = HistoryPageIndex + 1;
 
-
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
         this.context = context;
@@ -44,14 +43,13 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
             case TranslatePageIndex:
                 return R.drawable.exchange;
             case HistoryPageIndex:
-                return R.drawable.exchange;
+                return R.drawable.history;
             case FavoritesPageIndex:
-                return R.drawable.exchange;
+                return android.R.drawable.btn_star_big_off;
             default:
                 return 0;
         }
     }
-
 
     @Override
     public int getCount() {
