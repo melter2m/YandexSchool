@@ -20,7 +20,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     private static final String IntegerType = " INTEGER";
     private static final String StringType = " TEXT";
 
-    public DbOpenHelper(Context context) {
+    DbOpenHelper(Context context) {
         super(context, DbScheme.DbName, null, DbVersion);
     }
 

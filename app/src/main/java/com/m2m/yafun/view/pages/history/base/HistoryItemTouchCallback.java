@@ -3,7 +3,6 @@ package com.m2m.yafun.view.pages.history.base;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-import com.m2m.yafun.view.pages.history.base.HistoryItemViewHolder;
 import com.m2m.yafun.view.pages.history.helper.ItemTouchHelperAdapter;
 import com.m2m.yafun.view.pages.history.helper.SimpleItemTouchHelperCallback;
 

@@ -11,15 +11,15 @@ import com.m2m.yafun.model.db.scheme.DbScheme;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TableGateway<T extends EntityBase> implements ITableGateway<T> {
-    protected DbOpenHelper dbOpenHelper;
-    protected String tableName;
+abstract class TableGateway<T extends EntityBase> implements ITableGateway<T> {
+    private DbOpenHelper dbOpenHelper;
+    private String tableName;
 
     protected final static String EqualsValue = " = ? ";
     protected final static String And = " AND ";
     protected final static String DescendingOrder = " desc";
 
-    protected TableGateway(String tableName, DbOpenHelper dbOpenHelper) {
+    TableGateway(String tableName, DbOpenHelper dbOpenHelper) {
         this.tableName = tableName;
         this.dbOpenHelper = dbOpenHelper;
     }

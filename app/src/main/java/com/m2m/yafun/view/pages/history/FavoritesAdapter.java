@@ -7,9 +7,9 @@ import com.m2m.yafun.view.pages.history.base.HistoryBasePage;
 
 import java.util.List;
 
-public class FavoritesAdapter extends HistoryBaseAdapter {
+class FavoritesAdapter extends HistoryBaseAdapter {
 
-    protected FavoritesAdapter(HistoryBasePage historyPage, List<HistoryItem> historyItems) {
+    FavoritesAdapter(HistoryBasePage historyPage, List<HistoryItem> historyItems) {
         super(historyPage, historyItems);
     }
 

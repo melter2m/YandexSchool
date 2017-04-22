@@ -1,7 +1,6 @@
 package com.m2m.yafun.view.pages.history;
 
 import com.m2m.yafun.model.db.entities.HistoryItem;
-import com.m2m.yafun.view.pages.Page;
 import com.m2m.yafun.view.pages.history.base.HistoryBasePage;
 
 import java.util.List;
